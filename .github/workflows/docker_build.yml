@@ -1,0 +1,91 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata for CPU image
+      id: meta-cpu
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/${{ github.repository_owner }}/qwen3-tts
+        tags: |
+          type=raw,value=cpu
+          type=raw,value=latest
+
+    - name: Build and push CPU image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        target: cpu-base
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: ${{ steps.meta-cpu.outputs.tags }}
+        labels: ${{ steps.meta-cpu.outputs.labels }}
+
+    - name: Extract metadata for CUDA image
+      id: meta-cuda
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/${{ github.repository_owner }}/qwen3-tts
+        tags: |
+          type=raw,value=cuda
+
+    - name: Build and push CUDA image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile
+        target: production
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.meta-cuda.outputs.tags }}
+        labels: ${{ steps.meta-cuda.outputs.labels }}
+
+    - name: Extract metadata for vLLM image
+      id: meta-vllm
+      uses: docker/metadata-action@v5
+      with:
+        images: |
+          ghcr.io/${{ github.repository_owner }}/qwen3-tts
+        tags: |
+          type=raw,value=vllm
+
+    - name: Build and push vLLM image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.vllm
+        platforms: linux/amd64
+        push: true
+        tags: ${{ steps.meta-vllm.outputs.tags }}
+        labels: ${{ steps.meta-vllm.outputs.labels }}
