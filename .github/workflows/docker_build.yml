@@ -51,25 +51,25 @@ jobs:
         tags: ${{ steps.meta-cpu.outputs.tags }}
         labels: ${{ steps.meta-cpu.outputs.labels }}
 
-    - name: Extract metadata for CUDA image
-      id: meta-cuda
-      uses: docker/metadata-action@v5
-      with:
-        images: |
-          ghcr.io/${{ github.repository_owner }}/qwen3-tts
-        tags: |
-          type=raw,value=cuda
+    # - name: Extract metadata for CUDA image
+    #   id: meta-cuda
+    #   uses: docker/metadata-action@v5
+    #   with:
+    #     images: |
+    #       ghcr.io/${{ github.repository_owner }}/qwen3-tts
+    #     tags: |
+    #       type=raw,value=cuda
 
-    - name: Build and push CUDA image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        target: production
-        platforms: linux/amd64
-        push: true
-        tags: ${{ steps.meta-cuda.outputs.tags }}
-        labels: ${{ steps.meta-cuda.outputs.labels }}
+    # - name: Build and push CUDA image
+    #   uses: docker/build-push-action@v5
+    #   with:
+    #     context: .
+    #     file: ./Dockerfile
+    #     target: production
+    #     platforms: linux/amd64
+    #     push: true
+    #     tags: ${{ steps.meta-cuda.outputs.tags }}
+    #     labels: ${{ steps.meta-cuda.outputs.labels }}
 
     - name: Extract metadata for vLLM image
       id: meta-vllm
