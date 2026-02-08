@@ -1,4 +1,5 @@
 ```
-# CI/CD
-.github/workflows/
+# GitHub workflow files
+.github/workflows/inactive.yaml
+.github/workflows/translate.yaml
 ```
